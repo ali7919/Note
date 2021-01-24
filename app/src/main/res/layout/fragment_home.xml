@@ -7,7 +7,7 @@
 
         <variable
             name="vm"
-            type="com.codersan.newways.ui.home.NoteViewModel" />
+            type="com.codersan.newways.ui.home.HomeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

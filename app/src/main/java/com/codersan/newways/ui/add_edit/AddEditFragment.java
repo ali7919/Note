@@ -15,34 +15,30 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.NumberPicker;
 
 import com.codersan.newways.MainActivity;
 import com.codersan.newways.R;
 import com.codersan.newways.database.Note;
 import com.codersan.newways.databinding.FragmentAddeditBinding;
-import com.codersan.newways.ui.home.NoteViewModel;
+import com.codersan.newways.ui.home.HomeViewModel;
 
 
 public class AddEditFragment extends Fragment {
 
-
-    private NoteViewModel noteVM;
+    private HomeViewModel parent_vm;
+    private AddEditViewModel vm;
     private FragmentAddeditBinding binding;
-    private boolean editing = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-
         //get the right owner for the VM
         NavBackStackEntry pre = NavHostFragment.findNavController(this).getBackStackEntry(R.id.navigation_home);
-        noteVM = new ViewModelProvider(pre).get(NoteViewModel.class);
-
-
+        parent_vm = new ViewModelProvider(pre).get(HomeViewModel.class);
+        vm = new ViewModelProvider(this).get(AddEditViewModel.class);
+        vm.setNote(parent_vm.getOn_edit_Note());
         decoration();
 
 
@@ -50,12 +46,10 @@ public class AddEditFragment extends Fragment {
 
     public void decoration() {
         ((MainActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);// set drawable icon
-
-        if (noteVM.getOn_edit_Note().getValue() == null) {
-            ((MainActivity) getActivity()).getSupportActionBar().setTitle("add note");
-        } else {
+        if (vm.isEditing()) {
             ((MainActivity) getActivity()).getSupportActionBar().setTitle("edit note");
-            editing = true;
+        } else {
+            ((MainActivity) getActivity()).getSupportActionBar().setTitle("add note");
         }
     }
 
@@ -64,16 +58,7 @@ public class AddEditFragment extends Fragment {
 
         //init binding
         binding = FragmentAddeditBinding.inflate(inflater, container, false);
-
-        //init number picker
-        binding.np.setMinValue(1);
-        binding.np.setMaxValue(10);
-        if (noteVM.getOn_edit_Note().getValue() != null)
-            binding.np.setValue(noteVM.getOn_edit_Note().getValue().getPriority());
-        else noteVM.setOn_edit_Note(new Note("", "", 1));
-
-        //set binding value (two way binding)
-        binding.setNote(noteVM.getOn_edit_Note().getValue());
+        binding.setVm(vm);
 
         return binding.getRoot();
     }
@@ -89,7 +74,16 @@ public class AddEditFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save:
-                save();
+                //save
+                Note note = vm.getNote();
+                note.setPriority(binding.np.getValue());
+
+                if (vm.isEditing())
+                    parent_vm.update(note);
+                else
+                    parent_vm.insert(note);
+
+                getActivity().onBackPressed();
                 return true;
             default:
                 getActivity().onBackPressed();
@@ -102,23 +96,9 @@ public class AddEditFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        noteVM.setOn_edit_Note(null);
+        parent_vm.setOn_edit_Note(null);
 
     }
 
-    private void save() {
 
-        //done
-        Note note = noteVM.getOn_edit_Note().getValue();
-        note.setPriority(binding.np.getValue());
-
-        if (editing)
-            noteVM.update(note);
-        else
-            noteVM.insert(note);
-
-        getActivity().onBackPressed();
-
-
-    }
 }

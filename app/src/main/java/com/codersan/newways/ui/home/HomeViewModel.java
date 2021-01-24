@@ -10,26 +10,32 @@ import androidx.databinding.Bindable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.codersan.newways.R;
 import com.codersan.newways.database.Note;
 import com.codersan.newways.database.Repository;
 
 import java.util.List;
 
-public class NoteViewModel extends AndroidViewModel {
+public class HomeViewModel extends AndroidViewModel {
 
     //viewmodel shared between home fragment and its child(add edit fragment)
 
     private Repository repository;
     private LiveData<List<Note>> all_notes;
 
-    private MutableLiveData<Note> on_edit_Note=new MutableLiveData<>();
+    private Note on_edit_Note;
     private MutableLiveData<Integer> size=new MutableLiveData<>();
 
-    public NoteViewModel(@NonNull Application application) {
+    private RVA rva;
+
+    public HomeViewModel(@NonNull Application application) {
         super(application);
         repository = Repository.getInstance(application);
         all_notes = repository.getAll_notes();
+        setRva();
+
     }
 
 
@@ -54,13 +60,13 @@ public class NoteViewModel extends AndroidViewModel {
     }
 
     public void setOn_edit_Note(Note on_edit_Note) {
-        this.on_edit_Note.setValue(on_edit_Note);
+        this.on_edit_Note=(on_edit_Note);
     }
 
-    public LiveData<Note> getOn_edit_Note() {
+
+    public Note getOn_edit_Note() {
         return on_edit_Note;
     }
-
 
     public MutableLiveData<Integer> getSize() {
         return size;
@@ -70,6 +76,17 @@ public class NoteViewModel extends AndroidViewModel {
         if (all_notes==null || all_notes.getValue()==null)return;
         this.size.setValue(all_notes.getValue().size());
         Log.d("ddd",size.getValue()+"");
+
+    }
+
+    public RVA getRva() {
+        return rva;
+    }
+
+    public void setRva() {
+        rva = new RVA(() -> {setSize();});
+
+
 
     }
 }

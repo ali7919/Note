@@ -1,7 +1,6 @@
 package com.codersan.newways.ui.home;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,27 +21,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.codersan.newways.R;
 import com.codersan.newways.databinding.FragmentHomeBinding;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class HomeFragment extends Fragment {
 
 
     private FragmentHomeBinding binding;
-    private NoteViewModel noteVM;
+    private HomeViewModel vm;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
         //get the right owner for the VM
         NavBackStackEntry thisone = NavHostFragment.findNavController(this).getBackStackEntry(R.id.navigation_home);
-        noteVM = new ViewModelProvider(thisone).get(NoteViewModel.class);
-
+        vm = new ViewModelProvider(thisone).get(HomeViewModel.class);
         setHasOptionsMenu(true);
         binding=FragmentHomeBinding.inflate(inflater,container,false);
-
         binding.setLifecycleOwner(thisone);
-
-        binding.setVm(noteVM);
+        binding.setVm(vm);
 
         return binding.getRoot();
     }
@@ -50,7 +45,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        noteVM.setSize();
+        vm.setSize();
 
     }
 
@@ -59,15 +54,14 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         //init rv
-        RVA rva = new RVA(() -> {noteVM.setSize();});
-        rva.setOnEditListenner(note -> {
-            noteVM.setOn_edit_Note(note);
+        vm.getRva().setOnEditListenner(note -> {
+            vm.setOn_edit_Note(note);
             NavHostFragment.findNavController(this).navigate(R.id.action_navigation_home_to_blankFragment);
         });
 
         RecyclerView rv = binding.rv;
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rv.setAdapter(rva);
+        rv.setAdapter(vm.getRva());
 
 
         //swipe to delete
@@ -79,26 +73,21 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                noteVM.delete(rva.note_at(viewHolder.getAdapterPosition()));
+                vm.delete(vm.getRva().note_at(viewHolder.getAdapterPosition()));
                 Toast.makeText(getActivity(), "deleted", Toast.LENGTH_SHORT).show();
             }
         }).attachToRecyclerView(rv);
 
 
         //observe notes
-        noteVM.getAll_notes().observe(getActivity(), notes -> {
-            rva.submitList(notes);
-            Log.d("aaaa","ch");
+        vm.getAll_notes().observe(getActivity(), notes -> {
+            vm.getRva().submitList(notes);
         });
 
 
         //init fb
         binding.fab.setOnClickListener(view2 -> {
-
             NavHostFragment.findNavController(this).navigate(R.id.action_navigation_home_to_blankFragment);
-
-
-
         });
 
     }
@@ -114,7 +103,7 @@ public class HomeFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.deleteall:
-                noteVM.deleteall();
+                vm.deleteall();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

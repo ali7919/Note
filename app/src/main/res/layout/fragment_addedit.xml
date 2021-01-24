@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="note"
-            type="com.codersan.newways.database.Note" />
+            name="vm"
+            type="com.codersan.newways.ui.add_edit.AddEditViewModel" />
 
     </data>
 
@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:text="@={note.name}"
+                android:text="@={vm.note.name}"
                 android:hint="name"
                 android:inputType="textPersonName" />
 
@@ -44,7 +44,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ed_des"
                 android:layout_width="match_parent"
-                android:text="@={note.des}"
+                android:text="@={vm.note.des}"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName" />
@@ -66,6 +66,9 @@
             <NumberPicker
                 android:id="@+id/np"
                 android:layout_width="wrap_content"
+                custom_np="@{vm.priority}"
+
+
 
 
                 android:layout_height="wrap_content"
